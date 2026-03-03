@@ -1,7 +1,36 @@
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { BookOpen, PenTool, ClipboardCheck, Share2, Users } from "lucide-react";
+import { BookOpen, PenTool, ClipboardCheck, Share2, Users, LogOut } from "lucide-react";
+import StudentLogin from "@/components/Login/StudentLogin";
 
 export default function Home() {
+    const [user, setUser] = useState<{ name: string; number: number } | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("story-ai-user");
+        if (saved) {
+            setUser(JSON.parse(saved));
+        }
+        setIsLoading(false);
+    }, []);
+
+    const handleLogin = (data: { name: string; number: number }) => {
+        localStorage.setItem("story-ai-user", JSON.stringify(data));
+        setUser(data);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem("story-ai-user");
+        setUser(null);
+    };
+
+    if (isLoading) return null;
+
+    if (!user) {
+        return <StudentLogin onLogin={handleLogin} />;
+    }
+
     const stages = [
         { id: 1, name: "계획하기", icon: BookOpen, color: "bg-amber-100 text-amber-600", description: "아이디어를 모아요" },
         { id: 2, name: "초고 쓰기", icon: PenTool, color: "bg-emerald-100 text-emerald-600", description: "글을 써 내려가요" },
@@ -11,15 +40,23 @@ export default function Home() {
 
     return (
         <main className="min-h-screen p-8 max-w-5xl mx-auto">
-            <header className="mb-12 text-center relative">
-                <div className="absolute top-0 right-0">
+            <header className="mb-12 text-center relative flex justify-between items-start">
+                <div className="flex-1">
+                    <h1 className="text-4xl font-bold text-slate-800 mb-4">📝 이야기 함께 짓기</h1>
+                    <p className="text-lg text-slate-600">AI 코치와 함께 즐거운 글쓰기 여행을 떠나볼까요?</p>
+                </div>
+                <div className="flex flex-col gap-2 items-end">
+                    <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-100 shadow-sm">
+                        <span className="text-sm font-bold text-slate-600">{user.number}번 {user.name} 작가님</span>
+                        <button onClick={handleLogout} className="text-slate-400 hover:text-rose-500 transition-colors">
+                            <LogOut size={16} />
+                        </button>
+                    </div>
                     <Link href="/teacher" className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 shadow-sm flex items-center gap-2">
                         <Users size={16} />
                         교사 모드
                     </Link>
                 </div>
-                <h1 className="text-4xl font-bold text-slate-800 mb-4">📝 이야기 함께 짓기</h1>
-                <p className="text-lg text-slate-600">AI 코치와 함께 즐거운 글쓰기 여행을 떠나볼까요?</p>
             </header>
 
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
